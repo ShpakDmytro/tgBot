@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vdurmont.emoji.EmojiParser;
 import main.java.dto.*;
 
-
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -127,6 +126,12 @@ public class StartApp {
                     if (update.callbackQuery.data.equals("/work_time")){
                         message = showHelpCallback(update);
                     }
+                    if (update.callbackQuery.data.equals("/reserve")){
+                        message = showReserveCallback(update);
+                    }
+                    if (update.callbackQuery.data.equals("/reserveTable")) {
+                        message = doReserve(update);
+                    }
 
                 } else if (update.message.text != null) {
                     if (update.message.text.equals("/start")) {
@@ -152,6 +157,9 @@ public class StartApp {
                     }
                     if (update.message.text.equals("/help")) {
                         message = showHelp(update);
+                    }
+                    if (update.message.text.equals("/reserve")) {
+                        message = showReserve(update);
                     }
 
                 } else {
@@ -211,6 +219,55 @@ public class StartApp {
             }
         }
     }
+
+    private static SendMessage showReserve(Update update) {
+        String answerToUser = EmojiParser.parseToUnicode("Зарезервуйте собі столик для великої компанії у нашому" +
+                "закладі і він буде Вас чекати!");
+
+        InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
+        ArrayList<InlineKeyboardButton> buttonsInFirstRow = new ArrayList<>();
+        buttonsInFirstRow.add(new InlineKeyboardButton("Зарезервувати", "/reserveTable"));
+        ArrayList<InlineKeyboardButton> buttonsInSecondRow = new ArrayList<>();
+        buttonsInSecondRow.add(new InlineKeyboardButton("Повернутися в головне меню", "/start"));
+        markup.inline_keyboard = new ArrayList<>();
+        markup.inline_keyboard.add(buttonsInFirstRow);
+        markup.inline_keyboard.add(buttonsInSecondRow);
+        return new SendMessage(update.message.user.id, answerToUser, markup);
+
+    }
+
+    private static SendMessage doReserve(Update update) {
+        String answerToUser = EmojiParser.parseToUnicode("Дякуємо за резерв, " +
+                update.callbackQuery.user.first_name + ", ми чекаємо вас!");
+
+        System.out.println(update.callbackQuery.data);
+
+        orderNotification(update);
+
+        InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
+        ArrayList<InlineKeyboardButton> buttonsInFirstRow = new ArrayList<>();
+        buttonsInFirstRow.add(new InlineKeyboardButton("Повернутися в головне меню", "/start"));
+        markup.inline_keyboard = new ArrayList<>();
+        markup.inline_keyboard.add(buttonsInFirstRow);
+        return new SendMessage(update.callbackQuery.user.id, answerToUser, markup);
+    }
+
+    private static SendMessage showReserveCallback(Update update) {
+        String answerToUser = EmojiParser.parseToUnicode("Зарезервуйте собі столик для великої компанії у нашому" +
+                "закладі і він буде Вас чекати!");
+
+        InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
+        ArrayList<InlineKeyboardButton> buttonsInFirstRow = new ArrayList<>();
+        buttonsInFirstRow.add(new InlineKeyboardButton("Зарезервувати", "/reserveTable"));
+        ArrayList<InlineKeyboardButton> buttonsInSecondRow = new ArrayList<>();
+        buttonsInSecondRow.add(new InlineKeyboardButton("Повернутися в головне меню", "/start"));
+        markup.inline_keyboard = new ArrayList<>();
+        markup.inline_keyboard.add(buttonsInFirstRow);
+        markup.inline_keyboard.add(buttonsInSecondRow);
+        return new SendMessage(update.callbackQuery.user.id, answerToUser, markup);
+
+    }
+
     private static SendMessage showHelpCallback (Update update){
         String answerToUser = EmojiParser.parseToUnicode("З метою взаємодії з чатом необхідно обирати ті пункти " +
                 "меню, які зацікавили та натискати на екрані відповідну кнопку. В разі натискання на кнопку \"Замовити\" наші співробітніки, як найскоріше" +
@@ -596,16 +653,18 @@ public class StartApp {
         ArrayList<InlineKeyboardButton> buttonsInFirstRow = new ArrayList<>();
         buttonsInFirstRow.add(new InlineKeyboardButton(EmojiParser.parseToUnicode("Меню від шефа :man_cook:"), "/menu_from_sheff"));
         ArrayList<InlineKeyboardButton> buttonsInSecondRow = new ArrayList<>();
-        buttonsInSecondRow.add(new InlineKeyboardButton(EmojiParser.parseToUnicode("Сніданки :croissant:"), "/breakfast"));
-        buttonsInSecondRow.add(new InlineKeyboardButton(EmojiParser.parseToUnicode("Зв'язок :telephone_receiver:"), "/contact_info"));
+        buttonsInSecondRow.add(new InlineKeyboardButton(EmojiParser.parseToUnicode("Сніданки від шефу:croissant:"), "/breakfast"));
         ArrayList<InlineKeyboardButton> buttonsInThirdRow = new ArrayList<>();
-        buttonsInThirdRow.add(new InlineKeyboardButton(EmojiParser.parseToUnicode("Акції :star:"), "/stock"));
-        buttonsInThirdRow.add(new InlineKeyboardButton(EmojiParser.parseToUnicode("Доставка у БЦ :classical_building:"), "/delivery"));
+        buttonsInThirdRow.add(new InlineKeyboardButton(EmojiParser.parseToUnicode("Резерв столику"), "/reserve"));
+        buttonsInThirdRow.add(new InlineKeyboardButton(EmojiParser.parseToUnicode("Зв'язок :telephone_receiver:"), "/contact_info"));
         ArrayList<InlineKeyboardButton> buttonsInFourthRow = new ArrayList<>();
-        buttonsInFourthRow.add(new InlineKeyboardButton(EmojiParser.parseToUnicode("Час роботи :alarm_clock:"), "/work_time"));
-        buttonsInFourthRow.add(new InlineKeyboardButton(EmojiParser.parseToUnicode("Допомога з чатом :sos:"), "/help"));
+        buttonsInFourthRow.add(new InlineKeyboardButton(EmojiParser.parseToUnicode("Акції :star:"), "/stock"));
+        buttonsInFourthRow.add(new InlineKeyboardButton(EmojiParser.parseToUnicode("Доставка у БЦ :classical_building:"), "/delivery"));
         ArrayList<InlineKeyboardButton> buttonsInFifthRow = new ArrayList<>();
-        buttonsInFifthRow.add(new InlineKeyboardButton(EmojiParser.parseToUnicode("Побажання/зауваження :black_nib:"), "/advice"));
+        buttonsInFifthRow.add(new InlineKeyboardButton(EmojiParser.parseToUnicode("Час роботи :alarm_clock:"), "/work_time"));
+        buttonsInFifthRow.add(new InlineKeyboardButton(EmojiParser.parseToUnicode("Допомога з чатом :sos:"), "/help"));
+        ArrayList<InlineKeyboardButton> buttonsInSixRow = new ArrayList<>();
+        buttonsInSixRow.add(new InlineKeyboardButton(EmojiParser.parseToUnicode("Побажання/зауваження :black_nib:"), "/advice"));
 
         markup.inline_keyboard = new ArrayList<>();
         markup.inline_keyboard.add(buttonsInFirstRow);
@@ -613,6 +672,7 @@ public class StartApp {
         markup.inline_keyboard.add(buttonsInThirdRow);
         markup.inline_keyboard.add(buttonsInFourthRow);
         markup.inline_keyboard.add(buttonsInFifthRow);
+        markup.inline_keyboard.add(buttonsInSixRow);
 
         return new SendMessage(update.message.user.id, answerToUser, markup);
     }
@@ -916,6 +976,7 @@ public class StartApp {
         commandsFirstRow.add(new BotCommand("/start", "Головне меню"));
         commandsFirstRow.add(new BotCommand("/menu_from_sheff", "Вибір страв від шефу"));
         commandsFirstRow.add(new BotCommand("/breakfast", "Сніданок від шефу"));
+        commandsFirstRow.add(new BotCommand("/reserve","Резерв"));
         commandsFirstRow.add(new BotCommand("/contact_info", "Контакти та соціальні мережі"));
         commandsFirstRow.add(new BotCommand("/stock", "Діючі акції"));
         commandsFirstRow.add(new BotCommand("/delivery", "Доставка замовлень у БЦ Глорія"));
